@@ -1,4 +1,4 @@
-[![Test MAT-MEK4270 projects](https://github.com/sand0p/course-projects/actions/workflows/matmek4270.yml/badge.svg)](https://github.com/sand0p/course-projects/actions/workflows/matmek4270.yml)
+[![Test MAT-MEK4270 projects](https://github.com/sand0p/matmek-course-projects/actions/workflows/matmek4270.yml/badge.svg)](https://github.com/sand0p/matmek-course-projects/actions/workflows/matmek4270.yml)
 
 ## MAT-MEK4270 projects
 
