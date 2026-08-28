@@ -4,11 +4,11 @@ import numpy as np
 
 
 def mesh_function(f: Callable[[float], float], t: np.ndarray) -> np.ndarray:
-    raise NotImplementedError
+    return f(t)
 
 
 def func(t: float) -> float:
-    raise NotImplementedError
+    return np.where((0<=t) & (t<=3),np.e**(-t),np.e**(-3*t))
 
 
 def test_mesh_function():
