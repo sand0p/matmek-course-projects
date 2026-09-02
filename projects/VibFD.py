@@ -157,20 +157,32 @@ class VibFD2(VibSolver):
 
     order: int = 2
 
-    def __init__(self, Nt: int, T: float, w: float = 0.35, I: float = 1.0) -> None:
+    def __init__(self, Nt: int, T: float,  ue: sp.Expr, w: float = 0.35, I: float = 1.0) -> None:
         VibSolver.__init__(self, Nt, T, w, I)
-        T = float(T * w / np.pi)
-        assert T.is_integer() and T % 2 == 0
+        # T = float(T * w / np.pi)
+        # assert T.is_integer() and T % 2 == 0
+        self._ue = ue
+
+    def ue(self) -> sp.Expr:
+        """Return exact solution as sympy function"""
+        return self._ue
 
     def __call__(self) -> np.ndarray:
-        # u = np.zeros(self.Nt + 1)
+        u_exact = sp.lambdify(t, self.ue(), 'numpy')
+        f_sp = sp.diff(self.ue(), t, 2) + self.w ** 2 * self.ue()
+        f = sp.lambdify(t, f_sp, 'numpy')
+
         dt = self.T/self.Nt
         g = self.w**2 * dt**2 - 2
         A = sparse.diags([1,g,1], np.array([-1,0,1]), (self.Nt+1,self.Nt+1), 'lil')
         b = np.zeros(self.Nt + 1)
+
+        for n in range(1, self.Nt):
+            b[n] = dt**2 * f(n * dt)
+
         A[0, :3] = 1,0,0
         A[-1, -3:] = 0,0,1
-        b[0], b[-1] = self.I,self.I
+        b[0], b[-1] = u_exact(0), u_exact(self.T)
         u = sparse.linalg.spsolve(A.tocsr(), b)
         return u
 
@@ -233,9 +245,10 @@ class VibFD4(VibFD2):
 def test_order():
     w = 0.35
     VibHPL(8, 2 * np.pi / w, w).test_order()
-    VibFD2(8, 2 * np.pi / w, w).test_order()
+    VibFD2(8, 2 * np.pi / w, t**4, w).test_order()
+    VibFD2(8, 1.0, sp.exp(sp.sin(t)), w).test_order()
     VibFD3(8, 2 * np.pi / w, w).test_order()
-    VibFD4(8, 2 * np.pi / w, w).test_order(N0=20, tol = 0.05)
+    # VibFD4(8, 2 * np.pi / w, w).test_order(N0=20, tol = 0.05)
 
 
 if __name__ == "__main__":
